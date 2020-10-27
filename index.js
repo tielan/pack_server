@@ -30,6 +30,7 @@ function getNextCmd() {
     var cmd = cmdArr[i++];
     if (cmd) {
         var _cmd = cmd.split("#")[0]
+        console.log(_cmd)
         return _cmd.trim()
     } else {
         if (hasNextCmd()) {
