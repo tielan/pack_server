@@ -77,7 +77,7 @@ function doCMD(cmd, cwd) {
 }
 
 function pack(dir) {
-    compressing.zip.compressDir(path.join(realCWD, dir), path.join(realCWD, 'build.zip'))
+    compressing.zip.compressDir(path.join(realCWD, 'build'), path.join(realCWD, dir))
         .then(() => {
             console.log('success');
         })
