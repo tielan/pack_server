@@ -1,4 +1,5 @@
 var process = require('child_process');
+var compressing = require('compressing')
 var fs = require("fs")
 var path = require("path")
 var fileData = fs.readFileSync("config/packfile.sh");
@@ -53,6 +54,8 @@ function doNext() {
         if (cmd.startsWith("cd")) {
             realCWD = path.join(realCWD, cmd.replace("cd", "").trim())
             doNext();
+        } else if (cmd.startsWith("pack")) {
+            pack(cmd.replace("pack", "").trim())
         } else {
             doCMD(cmd, realCWD)
         }
@@ -65,16 +68,26 @@ function doCMD(cmd, cwd) {
     process.exec(cmd, { cwd: cwd }, function (error, stdout, stderr) {
         if (stdout) {
             console.log(stdout)
-        } 
+        }
         if (stderr) {
             console.log(stderr)
         }
         doNext();
     });
 }
+
+function pack(dir) {
+    compressing.zip.compressDir(path.join(realCWD, dir), path.join(realCWD, 'build.zip'))
+        .then(() => {
+            console.log('success');
+        })
+        .catch(err => {
+            console.error(err);
+        });
+}
 //日志输出
 function showLog(cwd, cmd) {
     var time = dateFormat("mm-dd HH:MM:SS", new Date())
-    console.log(time + cwd.replace(__dirname, " ."), cmd);
+    console.log(time + cwd.replace(__dirname, " .") + ' ' + cmd);
 }
 doNext();
