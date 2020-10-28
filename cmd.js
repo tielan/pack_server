@@ -1,7 +1,8 @@
-var process = require('child_process');
-var archiver = require('archiver');
-var utils = require('./utils')
-var path = require("path")
+const process = require('child_process');
+const archiver = require('archiver');
+const utils = require('./utils')
+const path = require("path")
+const fs = require('fs');
 
 //执行命令
 var doEXEC = function (cmd, realCWD, finshCall) {

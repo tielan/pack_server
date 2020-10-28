@@ -1,16 +1,16 @@
 const fs = require('fs');
-var path = require("path")
-var readline = require('readline');
-var CMD = require('./cmd');
-var utils = require('./utils')
+const path = require("path")
+const readline = require('readline');
+const CMD = require('./cmd');
+const utils = require('./utils')
 
 //读取配置文件
 function readFileToArr(fReadName, callback) {
-    var fRead = fs.createReadStream(fReadName);
-    var objReadline = readline.createInterface({
+    let fRead = fs.createReadStream(fReadName);
+    let objReadline = readline.createInterface({
         input: fRead
     });
-    var arr = new Array();
+    let arr = new Array();
     objReadline.on('line', function (line) {
         arr.push(line);
     });
@@ -18,17 +18,16 @@ function readFileToArr(fReadName, callback) {
         callback(arr);
     });
 }
-
 //日志输出
 function showLog(cwd, cmd) {
-    var time = utils.dateFormat("mm-dd HH:MM:SS", new Date())
+    let time = utils.dateFormat("mm-dd HH:MM:SS", new Date())
     console.log(time + cwd.replace(__dirname, " .") + ' ' + cmd);
 }
 function startAppPack(realCWD) {
-    var setp = -1;
+    let setp = -1;
     readFileToArr(path.join(realCWD, "packfile.sh"), function (cmdArr) {
         showLog("  [" + 0 + "]  " + realCWD, "开始打包");
-        var getNextCmdCall = function (_step, cmd) {
+        let getNextCmdCall = function (_step, cmd) {
             setp = _step;
             if (_step != -1) {
                 showLog("  [" + _step + "]  " + realCWD, cmd);
@@ -44,11 +43,11 @@ function startAppPack(realCWD) {
     })
 }
 function startPack(initCmd) {
-    var cmdArr = initCmd;
-    var realCWD = __dirname;
-    var setp = -1;
+    let cmdArr = initCmd;
+    let realCWD = __dirname;
+    let setp = -1;
     showLog("  [" + 0 + "]  " + realCWD, "开始初始化");
-    var getNextCmdCall = function (_step, cmd) {
+    let getNextCmdCall = function (_step, cmd) {
         setp = _step;
         if (_step != -1) {
             showLog("  [" + _step + "]  " + realCWD, cmd);
@@ -65,4 +64,3 @@ function startPack(initCmd) {
 }
 //startPack
 module.exports = startPack;
-//startPack(["mkdir source", "cd source", "git clone https://git8.c2cloud.cn/intelli-park/intelli-park-app-h5.git", "cd intelli-park-app-h5"])
