@@ -2,12 +2,25 @@ var process = require('child_process');
 const fs = require('fs');
 const archiver = require('archiver');
 var path = require("path")
-var fileData = fs.readFileSync("config/packfile.sh");
-var cmdArr = fileData.toString().split("\r\n");
+var readline = require('readline');
+
+var cmdArr = [];
 var realCWD = __dirname;
+var setp = 0;
 
-
-var i = 0;
+function readFileToArr(fReadName, callback) {
+    var fRead = fs.createReadStream(fReadName);
+    var objReadline = readline.createInterface({
+        input: fRead
+    });
+    var arr = new Array();
+    objReadline.on('line', function (line) {
+        arr.push(line);
+    });
+    objReadline.on('close', function () {
+        callback(arr);
+    });
+}
 function dateFormat(fmt, date) {
     let ret;
     const opt = {
@@ -30,7 +43,7 @@ function dateFormat(fmt, date) {
 
 //获取下一个命令
 function getNextCmd() {
-    var cmd = cmdArr[i++];
+    var cmd = cmdArr[setp++];
     if (cmd) {
         var _cmd = cmd.split("#")[0];
         if (_cmd.indexOf('${time}')) {
@@ -48,7 +61,7 @@ function getNextCmd() {
 
 //判断是否 执行完成
 function hasNextCmd() {
-    return cmdArr && cmdArr.length > i;
+    return cmdArr && cmdArr.length > setp;
 }
 
 //执行下一个命令
@@ -59,6 +72,7 @@ function doNext() {
     }
     let cmd = getNextCmd();
     if (cmd) {
+        showLog("  [" + setp + "]  " + realCWD, cmd);
         if (cmd.startsWith("cd")) {
             realCWD = path.join(realCWD, cmd.replace("cd", "").trim())
             doNext();
@@ -72,20 +86,19 @@ function doNext() {
 }
 //执行命令
 function doCMD(cmd, cwd) {
-    showLog(cwd, cmd);
-    process.exec(cmd, { cwd: cwd }, function (error, stdout, stderr) {
+    process.exec(cmd, { cwd: cwd }, (error, stdout, stderr) => {
         if (stdout) {
-          //  console.log(stdout)
+            //  console.log(stdout)
         }
         if (stderr) {
-          //  console.log(stderr)
+            //  console.log(stderr)
         }
         doNext();
     });
 }
 
 function pack(dir) {
-    try {  fs.mkdirSync(path.join(realCWD, dir.split(" ")[0])) } catch (error) {    }
+    try { fs.mkdirSync(path.join(realCWD, dir.split(" ")[0])) } catch (error) { }
     const archive = archiver('zip');
     const output = fs.createWriteStream(path.join(realCWD, dir.split(" ")[0], dir.split(" ")[1]));
     output.on('close', function () {
@@ -101,4 +114,12 @@ function showLog(cwd, cmd) {
     var time = dateFormat("mm-dd HH:MM:SS", new Date())
     console.log(time + cwd.replace(__dirname, " .") + ' ' + cmd);
 }
-doNext();
+
+
+function _main_() {
+    readFileToArr("config/packfile.sh", function (res) {
+        cmdArr = res;
+        doNext();
+    })
+}
+_main_();
