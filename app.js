@@ -21,5 +21,5 @@ app.listen(port, function () {
 })
 
 function initCmd(git_http_url, projectName) {
-    return ["mkdir source", "cd source", "git clone " + git_http_url, "cd " + projectName]
+    return ["mkdir source", "cd source", "git clone " + git_http_url, "cd " + projectName,"git pull"]
 }
