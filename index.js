@@ -5,8 +5,9 @@ var path = require("path")
 var fileData = fs.readFileSync("config/packfile.sh");
 var cmdArr = fileData.toString().split("\r\n");
 const archive = archiver('zip');
-
 var realCWD = __dirname;
+
+
 var i = 0;
 function dateFormat(fmt, date) {
     let ret;
@@ -27,11 +28,15 @@ function dateFormat(fmt, date) {
     };
     return fmt;
 }
+
 //获取下一个命令
 function getNextCmd() {
     var cmd = cmdArr[i++];
     if (cmd) {
-        var _cmd = cmd.split("#")[0]
+        var _cmd = cmd.split("#")[0];
+        if (_cmd.indexOf('${time}')) {
+            _cmd = _cmd.replace('${time}', dateFormat('YYYMMdd_HHmmSS', new Date()))
+        }
         return _cmd.trim()
     } else {
         if (hasNextCmd()) {
@@ -41,10 +46,12 @@ function getNextCmd() {
         }
     }
 }
+
 //判断是否 执行完成
 function hasNextCmd() {
     return cmdArr && cmdArr.length > i;
 }
+
 //执行下一个命令
 function doNext() {
     if (!hasNextCmd()) {
@@ -53,7 +60,6 @@ function doNext() {
     }
     let cmd = getNextCmd();
     if (cmd) {
-        console.log(cmd)
         if (cmd.startsWith("cd")) {
             realCWD = path.join(realCWD, cmd.replace("cd", "").trim())
             doNext();
@@ -70,19 +76,21 @@ function doCMD(cmd, cwd) {
     showLog(cwd, cmd);
     process.exec(cmd, { cwd: cwd }, function (error, stdout, stderr) {
         if (stdout) {
-            console.log(stdout)
+          //  console.log(stdout)
         }
         if (stderr) {
-            console.log(stderr)
+          //  console.log(stderr)
         }
         doNext();
     });
 }
 
 function pack(dir) {
-    const output = fs.createWriteStream(path.join(realCWD, dir));
-    output.on('end', function () {
+    try {  fs.mkdirSync(path.join(realCWD, dir.split(" ")[0])) } catch (error) {    }
+    const output = fs.createWriteStream(path.join(realCWD, dir.split(" ")[0], dir.split(" ")[1]));
+    output.on('close', function () {
         console.log('Data has been drained');
+        doNext();
     });
     archive.pipe(output);
     archive.directory(path.join(realCWD, 'build'), false);
