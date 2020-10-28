@@ -4,7 +4,6 @@ const archiver = require('archiver');
 var path = require("path")
 var fileData = fs.readFileSync("config/packfile.sh");
 var cmdArr = fileData.toString().split("\r\n");
-const archive = archiver('zip');
 var realCWD = __dirname;
 
 
@@ -87,6 +86,7 @@ function doCMD(cmd, cwd) {
 
 function pack(dir) {
     try {  fs.mkdirSync(path.join(realCWD, dir.split(" ")[0])) } catch (error) {    }
+    const archive = archiver('zip');
     const output = fs.createWriteStream(path.join(realCWD, dir.split(" ")[0], dir.split(" ")[1]));
     output.on('close', function () {
         console.log('Data has been drained');
