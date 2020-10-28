@@ -102,7 +102,6 @@ function pack(dir) {
     const archive = archiver('zip');
     const output = fs.createWriteStream(path.join(realCWD, dir.split(" ")[0], dir.split(" ")[1]));
     output.on('close', function () {
-        console.log('Data has been drained');
         doNext();
     });
     archive.pipe(output);
@@ -119,6 +118,7 @@ function showLog(cwd, cmd) {
 function _main_() {
     readFileToArr("config/packfile.sh", function (res) {
         cmdArr = res;
+        showLog("  [" + 0 + "]  " + realCWD, "开始执行任务");
         doNext();
     })
 }
