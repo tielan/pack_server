@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "archiver": "^5.0.2",
     "compressing": "^1.5.1"
   }
 }

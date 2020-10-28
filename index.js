@@ -1,9 +1,11 @@
 var process = require('child_process');
-var compressing = require('compressing')
-var fs = require("fs")
+const fs = require('fs');
+const archiver = require('archiver');
 var path = require("path")
 var fileData = fs.readFileSync("config/packfile.sh");
 var cmdArr = fileData.toString().split("\r\n");
+const archive = archiver('zip');
+
 var realCWD = __dirname;
 var i = 0;
 function dateFormat(fmt, date) {
@@ -30,7 +32,6 @@ function getNextCmd() {
     var cmd = cmdArr[i++];
     if (cmd) {
         var _cmd = cmd.split("#")[0]
-        console.log(_cmd)
         return _cmd.trim()
     } else {
         if (hasNextCmd()) {
@@ -52,6 +53,7 @@ function doNext() {
     }
     let cmd = getNextCmd();
     if (cmd) {
+        console.log(cmd)
         if (cmd.startsWith("cd")) {
             realCWD = path.join(realCWD, cmd.replace("cd", "").trim())
             doNext();
@@ -78,13 +80,13 @@ function doCMD(cmd, cwd) {
 }
 
 function pack(dir) {
-    compressing.zip.compressDir(path.join(realCWD, 'build'), path.join(realCWD, dir))
-        .then(() => {
-            console.log('success');
-        })
-        .catch(err => {
-            console.error(err);
-        });
+    const output = fs.createWriteStream(path.join(realCWD, dir));
+    output.on('end', function () {
+        console.log('Data has been drained');
+    });
+    archive.pipe(output);
+    archive.directory(path.join(realCWD, 'build'), false);
+    archive.finalize();
 }
 //日志输出
 function showLog(cwd, cmd) {
